@@ -8,6 +8,9 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
+const PORT = process.env.PORT;
+// const PORT = 8080;
+
 var username = ""; // username of TDSQL-C SQL database default: root
 var password = ""; // password of TDSQL-C SQL database
 var host = ""; // host name of TDSQL-C SQL database
@@ -142,12 +145,13 @@ app.get("/test", function (req, res) {
     "Access-Control-Allow-Headers",
     "X-Requested-With,Content-Type"
   );
-  res.json("successfully return callback value");
+  res.json("return value from test by get method");
 });
 
-//monitor server
-app.listen(process.env.PORT, function (req, res) {
-  console.log(`Kinsta Nodejs Server is running on port ${process.env.PORT}`);
+app.post("/IoTTest", function (req, res) {
+  console.log("req body value IoT", req.body);
+  let data = "req body value ";
+  res.json(data + req.body.data);
 });
 
 function tencentGetAccounts(req, res) {
@@ -201,3 +205,8 @@ function tencentGetAccounts(req, res) {
     }
   );
 }
+
+//monitor server
+app.listen(PORT, function (req, res) {
+  console.log(`Kinsta Server is running on port ${PORT}`);
+});
