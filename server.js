@@ -15,11 +15,18 @@ var port = ""; // port number of TDSQL-C SQL database
 var database = ""; // database name of TDSQL-C SQL database
 
 app.post("/login", async function (req, res) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "X-Requested-With,Content-Type"
+  );
+
   username = req.body.username;
   password = req.body.password;
   host = req.body.host;
   port = req.body.port;
-  database = req.body.port;
+  database = req.body.database;
 
   try {
     const mysql = require("mysql");
@@ -129,11 +136,17 @@ app.get("/getTencentAccounts", function (req, res) {
 });
 
 app.get("/test", function (req, res) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "X-Requested-With,Content-Type"
+  );
   res.json("successfully return callback value");
 });
 
 //monitor server
-app.listen(process.env.PORT, function (req, res) {
+app.listen(8080, function (req, res) {
   console.log(`Kinsta Nodejs Server is running on port ${process.env.PORT}`);
 });
 
