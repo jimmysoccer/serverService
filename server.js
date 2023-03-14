@@ -146,7 +146,7 @@ app.get("/test", function (req, res) {
 });
 
 //monitor server
-app.listen(8080, function (req, res) {
+app.listen(process.env.PORT, function (req, res) {
   console.log(`Kinsta Nodejs Server is running on port ${process.env.PORT}`);
 });
 
