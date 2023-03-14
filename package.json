@@ -1,0 +1,25 @@
+{
+  "name": "web_server",
+  "version": "0.0.1",
+  "description": "This is a kinsta deployed web server. I am testing it to make sure everything works correctly.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jimmysoccer/serverService.git"
+  },
+  "author": "Heng Sun (jimmysoccer0927@gmail.com)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jimmysoccer/serverService/issues"
+  },
+  "homepage": "https://github.com/jimmysoccer/serverService#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "tencentcloud-sdk-nodejs": "^4.0.558"
+  }
+}
