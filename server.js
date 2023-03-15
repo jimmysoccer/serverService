@@ -8,8 +8,10 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-// const PORT = process.env.PORT;
-const PORT = 8080;
+var userNum = 0;
+
+const PORT = process.env.PORT;
+// const PORT = 8080;
 
 var username = ""; // username of TDSQL-C SQL database default: root
 var password = ""; // password of TDSQL-C SQL database
@@ -19,6 +21,10 @@ var database = ""; // database name of TDSQL-C SQL database
 
 app.get("/", function (req, res) {
   res.send(`Server is working on ${PORT}`);
+});
+
+app.get("/getUserNum", function (req, res) {
+  res.json(userNum);
 });
 
 app.post("/login", async function (req, res) {
@@ -144,6 +150,7 @@ app.get("/getTencentAccounts", function (req, res) {
 
 app.get("/test", function (req, res) {
   // res.send(req.params);
+  userNum += 1;
   res.json("return value from test by get method");
 });
 
