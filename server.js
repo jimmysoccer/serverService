@@ -8,14 +8,18 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-const PORT = process.env.PORT;
-// const PORT = 8080;
+// const PORT = process.env.PORT;
+const PORT = 8080;
 
 var username = ""; // username of TDSQL-C SQL database default: root
 var password = ""; // password of TDSQL-C SQL database
 var host = ""; // host name of TDSQL-C SQL database
 var port = ""; // port number of TDSQL-C SQL database
 var database = ""; // database name of TDSQL-C SQL database
+
+app.get("/", function (req, res) {
+  res.send(`Server is working on ${PORT}`);
+});
 
 app.post("/login", async function (req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -139,18 +143,13 @@ app.get("/getTencentAccounts", function (req, res) {
 });
 
 app.get("/test", function (req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST");
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "X-Requested-With,Content-Type"
-  );
+  // res.send(req.params);
   res.json("return value from test by get method");
 });
 
 app.post("/IoTTest", function (req, res) {
-  console.log("req body value IoT", req.body);
   let data = "req body value ";
+  res.send(data + req.body);
   res.json(data + req.body.data);
 });
 
@@ -210,3 +209,35 @@ function tencentGetAccounts(req, res) {
 app.listen(PORT, function (req, res) {
   console.log(`Kinsta Server is running on port ${PORT}`);
 });
+
+// var http = require("http");
+
+// http
+//   .createServer(function (req, res) {
+//     var html = buildHtml(req);
+
+//     res.writeHead(200, {
+//       "Content-Type": "text/html",
+//       "Content-Length": html.length,
+//       Expires: new Date().toUTCString(),
+//     });
+//     res.end(html);
+//   })
+//   .listen(PORT);
+
+// function buildHtml(req) {
+//   var header = "Hello World!";
+//   var body = "This is html created by nodejs and run by node server.js command";
+
+//   // concatenate header string
+//   // concatenate body string
+
+//   return (
+//     "<!DOCTYPE html>" +
+//     "<html><head>" +
+//     header +
+//     "</head><body>" +
+//     body +
+//     "</body></html>"
+//   );
+// }
