@@ -9,6 +9,9 @@ net
   .createServer(function (sock) {
     // We have a connection - a socket object is assigned to the connection automatically
     console.log("CONNECTED: " + sock.remoteAddress + ":" + sock.remotePort);
+    sock.write(
+      sock.remoteAddress + " " + sock.remotePort + " conneted to server!"
+    );
     // Add a 'data' event handler to this instance of socket
     sock.on("data", function (data) {
       console.log("DATA " + sock.remoteAddress + ": " + data);
@@ -18,6 +21,7 @@ net
     // Add a 'close' event handler to this instance of socket
     sock.on("close", function (data) {
       console.log("CLOSED: " + sock.remoteAddress + " " + sock.remotePort);
+      sock.write("socket connection is closed");
     });
   })
   .listen(PORT);
