@@ -10,8 +10,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 var userNum = 0;
 
-const PORT = process.env.PORT;
-// const PORT = 8080;
+const PORT = 80;
 
 var username = ""; // username of TDSQL-C SQL database default: root
 var password = ""; // password of TDSQL-C SQL database
@@ -214,7 +213,7 @@ function tencentGetAccounts(req, res) {
 
 //monitor server
 app.listen(PORT, function (req, res) {
-  console.log(`Kinsta Server is running on port ${PORT}`);
+  console.log(`Web Server is running on port ${PORT}`);
 });
 
 // var http = require("http");

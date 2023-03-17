@@ -1,7 +1,7 @@
 var net = require("net");
 
-var HOST = "https://serverservice-u2y2a.kinsta.app";
-var PORT = 8080;
+var HOST = "IP_ADDRESS";
+var PORT = "port_num";
 
 var client = new net.Socket();
 client.connect(PORT, HOST, function () {
