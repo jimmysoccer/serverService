@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const https = require("https");
 
 const app = express();
 
@@ -212,38 +213,6 @@ function tencentGetAccounts(req, res) {
 }
 
 //monitor server
-app.listen(PORT, function (req, res) {
-  console.log(`Web Server is running on port ${PORT}`);
+https.createServer(app).listen(PORT, () => {
+  console.log(`server is runing at port ${PORT}`);
 });
-
-// var http = require("http");
-
-// http
-//   .createServer(function (req, res) {
-//     var html = buildHtml(req);
-
-//     res.writeHead(200, {
-//       "Content-Type": "text/html",
-//       "Content-Length": html.length,
-//       Expires: new Date().toUTCString(),
-//     });
-//     res.end(html);
-//   })
-//   .listen(PORT);
-
-// function buildHtml(req) {
-//   var header = "Hello World!";
-//   var body = "This is html created by nodejs and run by node server.js command";
-
-//   // concatenate header string
-//   // concatenate body string
-
-//   return (
-//     "<!DOCTYPE html>" +
-//     "<html><head>" +
-//     header +
-//     "</head><body>" +
-//     body +
-//     "</body></html>"
-//   );
-// }
