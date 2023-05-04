@@ -18,10 +18,15 @@
   },
   "homepage": "https://github.com/jimmysoccer/serverService#readme",
   "dependencies": {
+    "connect": "^3.7.0",
     "cors": "^2.8.5",
     "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "memorystore": "^1.6.7",
     "mysql": "^2.18.1",
+    "sessionstore": "^1.3.7",
     "socket.io": "^4.6.1",
-    "tencentcloud-sdk-nodejs": "^4.0.558"
+    "tencentcloud-sdk-nodejs": "^4.0.558",
+    "uuid": "^9.0.0"
   }
 }
