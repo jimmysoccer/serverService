@@ -19,6 +19,7 @@ origins = ["*"]
 async def startup_db_client():
     mongodbURI = os.getenv("MONGODB_URI")
     mongodbName = os.getenv("MONGODB_NAME")
+    print(f"Connecting to MongoDB at {mongodbURI} with database {mongodbName}")
     app.state.mongo_client = AsyncIOMotorClient(mongodbURI)  # Async MongoDB client
     app.state.mongo_db = app.state.mongo_client[mongodbName]  # Database
     app.state.users_coll = app.state.mongo_db["users"]

@@ -46,6 +46,8 @@ async def login(user: User, request: Request):
     username = user.username
     password = user.password
 
+    print("username:", username)
+
     try:
         # Retrieve the user document by username
         db_user = await request.app.state.users_coll.find_one({"username": username})
@@ -70,3 +72,8 @@ async def login(user: User, request: Request):
         return JSONResponse(
             status_code=404, content={"message": "exception login failed"}
         )
+
+
+@personal_website_router.get("/ping")
+async def login():
+    return JSONResponse(status_code=200, content={"message": "pong!"})
