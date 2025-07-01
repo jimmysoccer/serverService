@@ -25,9 +25,7 @@ async def startup_db_client():
     app.state.users_coll = app.state.mongo_db["users"]
 
 
-app.include_router(
-    personal_website_router, tags=["Jimmy Website"], prefix="/jimmy_website"
-)
+app.include_router(personal_website_router, tags=["Users"], prefix="/jimmy_website")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
