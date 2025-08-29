@@ -6,6 +6,7 @@
 /.pnp
 .pnp.js
 __pycache__/
+test_js_ih_api.py
 
 # testing
 /coverage

@@ -1,1 +1,1 @@
-from .education_models import *
+from .js_ih_models import *

@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from .routers.personal_website import personal_website_router
+from .routers.personal_website.js_ih_router import js_ih_router
 import os
 
 from motor.motor_asyncio import (
@@ -23,9 +24,11 @@ async def startup_db_client():
     app.state.mongo_client = AsyncIOMotorClient(mongodbURI)  # Async MongoDB client
     app.state.mongo_db = app.state.mongo_client[mongodbName]  # Database
     app.state.users_coll = app.state.mongo_db["users"]
+    app.state.js_ih_coll = app.state.mongo_db["JS-IH-1"]
 
 
 app.include_router(personal_website_router, tags=["Users"], prefix="/jimmy_website")
+app.include_router(js_ih_router, tags=["JS-IH-1"], prefix="/jimmy_website")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
