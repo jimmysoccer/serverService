@@ -23,3 +23,6 @@ test_js_ih_api.py
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+token.json
+credentials.json

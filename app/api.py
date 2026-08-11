@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from .routers.personal_website import personal_website_router
 from .routers.personal_website.js_ih_router import js_ih_router
+from .routers.canvas_sync import canvas_router
 import os
 
 from motor.motor_asyncio import (
@@ -29,6 +30,7 @@ async def startup_db_client():
 
 app.include_router(personal_website_router, tags=["Users"], prefix="/jimmy_website")
 app.include_router(js_ih_router, tags=["JS-IH-1"], prefix="/jimmy_website")
+app.include_router(canvas_router, tags=["Canvas Sync"], prefix="/canvas_sync")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
