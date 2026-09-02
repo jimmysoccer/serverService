@@ -1,6 +1,6 @@
 import json
 import os
-from datetime import datetime, date, timezone
+from datetime import datetime, date
 from pathlib import Path
 
 import requests
@@ -24,6 +24,8 @@ CANVAS_ICAL_URL = os.getenv("CANVAS_ICAL_URL")
 SCOPES = ["https://www.googleapis.com/auth/tasks"]
 
 TASK_LIST_NAME = "Canvas Assignments"
+MAX_TASK_TITLE_LENGTH = 1024
+MAX_TASK_NOTES_LENGTH = 8192
 
 BACKEND_DIR = Path(__file__).resolve().parents[3]
 TOKEN_PATH = Path(os.getenv("GOOGLE_TOKEN_PATH", BACKEND_DIR / "token.json"))
@@ -210,9 +212,9 @@ def google_due_date(canvas_due):
     else:
         return None
 
-    return datetime(
-        due_date.year, due_date.month, due_date.day, tzinfo=timezone.utc
-    ).isoformat()
+    # Google Tasks stores only the date portion and can reject otherwise valid
+    # RFC 3339 variants. Use its canonical midnight-UTC representation.
+    return f"{due_date.isoformat()}T00:00:00.000Z"
 
 
 def readable_due_time(canvas_due):
@@ -220,6 +222,19 @@ def readable_due_time(canvas_due):
         return canvas_due.strftime("%B %d, %Y at %I:%M %p")
 
     return canvas_due.strftime("%B %d, %Y")
+
+
+def google_task_notes(event, canvas_due):
+    prefix = (
+        "Canvas assignment\n\n"
+        f"Original Canvas due: {readable_due_time(canvas_due)}\n\n"
+    )
+    suffix = f"\n\nCANVAS_UID:{event['uid']}"
+    available_description_length = max(
+        0, MAX_TASK_NOTES_LENGTH - len(prefix) - len(suffix)
+    )
+    description = event["description"][:available_description_length]
+    return f"{prefix}{description}{suffix}"
 
 
 # --------------------------------------------------
@@ -275,16 +290,10 @@ def sync():
 
         uid = event["uid"]
 
-        notes = (
-            f"Canvas assignment\n\n"
-            f"Original Canvas due: "
-            f"{readable_due_time(canvas_due)}\n\n"
-            f"{event['description']}\n\n"
-            f"CANVAS_UID:{uid}"
-        )
+        notes = google_task_notes(event, canvas_due)
 
         body = {
-            "title": event["title"],
+            "title": event["title"][:MAX_TASK_TITLE_LENGTH],
             "notes": notes,
             "due": google_due_date(canvas_due),
         }
