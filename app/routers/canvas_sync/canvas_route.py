@@ -1,3 +1,4 @@
+import json
 import os
 from datetime import datetime, date, timezone
 from pathlib import Path
@@ -8,8 +9,10 @@ from icalendar import Calendar
 
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
+from google.auth.exceptions import RefreshError
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
+from fastapi import HTTPException
 
 from .canvas_router import canvas_router
 
@@ -22,31 +25,84 @@ SCOPES = ["https://www.googleapis.com/auth/tasks"]
 
 TASK_LIST_NAME = "Canvas Assignments"
 
+BACKEND_DIR = Path(__file__).resolve().parents[3]
+TOKEN_PATH = Path(os.getenv("GOOGLE_TOKEN_PATH", BACKEND_DIR / "token.json"))
+CREDENTIALS_PATH = Path(
+    os.getenv("GOOGLE_CREDENTIALS_PATH", BACKEND_DIR / "credentials.json")
+)
+
+
+class GoogleAuthorizationRequired(RuntimeError):
+    """Raised when the stored Google grant is missing, expired, or revoked."""
+
 
 # --------------------------------------------------
 # Google authentication
 # --------------------------------------------------
 
 
-def get_google_service():
-    creds = None
+def _credentials_from_environment():
+    token_json = os.getenv("GOOGLE_TOKEN_JSON")
+    if not token_json:
+        return None
 
-    if Path("token.json").exists():
-        creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+    try:
+        return Credentials.from_authorized_user_info(json.loads(token_json), SCOPES)
+    except (TypeError, ValueError, KeyError) as exc:
+        raise GoogleAuthorizationRequired(
+            "GOOGLE_TOKEN_JSON is not a valid authorized-user token."
+        ) from exc
+
+
+def _save_credentials(creds, *, force=False):
+    # An environment-provided refresh token is deliberately not written to the
+    # instance filesystem. It remains usable even when its access token expires.
+    if os.getenv("GOOGLE_TOKEN_JSON") and not force:
+        return
+
+    TOKEN_PATH.parent.mkdir(parents=True, exist_ok=True)
+    TOKEN_PATH.write_text(creds.to_json(), encoding="utf-8")
+
+
+def get_google_service():
+    creds = _credentials_from_environment()
+
+    if creds is None and TOKEN_PATH.exists():
+        creds = Credentials.from_authorized_user_file(str(TOKEN_PATH), SCOPES)
 
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-
+            try:
+                creds.refresh(Request())
+            except RefreshError as exc:
+                raise GoogleAuthorizationRequired(
+                    "Google authorization expired or was revoked. Run the local "
+                    "authorization command again and replace GOOGLE_TOKEN_JSON "
+                    "in the deployed service."
+                ) from exc
         else:
-            flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
+            raise GoogleAuthorizationRequired(
+                "Google Tasks is not authorized. Run the local authorization command first."
+            )
 
-            creds = flow.run_local_server(port=0)
-
-        with open("token.json", "w") as token:
-            token.write(creds.to_json())
+        _save_credentials(creds)
 
     return build("tasks", "v1", credentials=creds)
+
+
+def authorize_google():
+    """Perform the interactive desktop flow; never call this from a web request."""
+    if not CREDENTIALS_PATH.exists():
+        raise FileNotFoundError(f"Missing OAuth client file: {CREDENTIALS_PATH}")
+
+    flow = InstalledAppFlow.from_client_secrets_file(str(CREDENTIALS_PATH), SCOPES)
+    creds = flow.run_local_server(
+        port=0,
+        access_type="offline",
+        prompt="consent",
+    )
+    _save_credentials(creds, force=True)
+    return creds
 
 
 # --------------------------------------------------
@@ -270,5 +326,7 @@ async def canvas_sync():
     try:
         sync()
         return {"message": "Sync complete!"}
+    except GoogleAuthorizationRequired as e:
+        raise HTTPException(status_code=401, detail=str(e)) from e
     except Exception as e:
-        return {"message": f"Error: {e}"}
+        raise HTTPException(status_code=500, detail=f"Canvas sync failed: {e}") from e
