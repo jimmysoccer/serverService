@@ -1,4 +1,6 @@
+import errno
 import json
+import logging
 import os
 from datetime import datetime, date
 from pathlib import Path
@@ -33,6 +35,8 @@ CREDENTIALS_PATH = Path(
     os.getenv("GOOGLE_CREDENTIALS_PATH", BACKEND_DIR / "credentials.json")
 )
 
+logger = logging.getLogger(__name__)
+
 
 class GoogleAuthorizationRequired(RuntimeError):
     """Raised when the stored Google grant is missing, expired, or revoked."""
@@ -62,8 +66,17 @@ def _save_credentials(creds, *, force=False):
     if os.getenv("GOOGLE_TOKEN_JSON") and not force:
         return
 
-    TOKEN_PATH.parent.mkdir(parents=True, exist_ok=True)
-    TOKEN_PATH.write_text(creds.to_json(), encoding="utf-8")
+    try:
+        TOKEN_PATH.parent.mkdir(parents=True, exist_ok=True)
+        TOKEN_PATH.write_text(creds.to_json(), encoding="utf-8")
+    except OSError as exc:
+        # App Engine deploys application files under a read-only /workspace.
+        # Saving the refreshed access token is only a cache optimization: the
+        # long-lived refresh token can obtain a new access token on every
+        # instance/request, so a read-only filesystem must not fail the sync.
+        if exc.errno not in (errno.EROFS, errno.EACCES, errno.EPERM):
+            raise
+        logger.warning("Google token cache is read-only; continuing without saving it")
 
 
 def get_google_service():
